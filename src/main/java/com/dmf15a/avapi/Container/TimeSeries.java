@@ -4,25 +4,17 @@ import java.util.ArrayList;
 
 public class TimeSeries {
 
-    public enum Type {INTRADAY, DAILY, WEEKLY, MONTHLY, COUNT};
+    public enum Type {INTRADAY, DAILY, WEEKLY, MONTHLY, COUNT}
 
     public MetaInfo info;
     public ArrayList<TimePair> data;
 
-    public TimeSeries()
-    {
+    public TimeSeries() {
         this.info = new MetaInfo();
-        this.data = new ArrayList<TimePair>();
+        this.data = new ArrayList<>();
     }
 
-    public TimeSeries(ArrayList<TimePair> data)
-    {
-        this.info = new MetaInfo();
-        this.data = new ArrayList<>(data);
-    }
-
-    public TimeSeries(TimeSeries series)
-    {
+    public TimeSeries(TimeSeries series) {
         this.info = new MetaInfo(series.info);
         this.data = new ArrayList<>(series.data);
     }

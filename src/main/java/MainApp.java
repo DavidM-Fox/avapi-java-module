@@ -11,7 +11,8 @@ public class MainApp {
         String symbol = "GME";
         String function = "GLOBAL_QUOTE";
 
-        Stock gme = new Stock(symbol, "KEY");
-        TimeSeries series = gme.getTimeSeries(TimeSeries.Type.INTRADAY, true, "30min");
+        Stock gme = new Stock(symbol, "");
+        gme.setApiKey("KEY");
+        TimeSeries series = gme.getTimeSeries(TimeSeries.Type.INTRADAY, true);
     }
 }

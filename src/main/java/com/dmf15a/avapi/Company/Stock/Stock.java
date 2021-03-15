@@ -9,6 +9,9 @@ import java.util.Map;
 
 public class Stock extends ApiQuery {
 
+    public String symbol;
+    public String outputSize;
+
     public Stock() {
         super("");
         this.symbol = "";
@@ -22,15 +25,11 @@ public class Stock extends ApiQuery {
     }
 
     public TimeSeries getTimeSeries(TimeSeries.Type type, Boolean adjusted) throws IOException {
-        return getCsvData(type, adjusted, "");
+
+        return getTimeSeries(type, adjusted, "");
     }
 
     public TimeSeries getTimeSeries(TimeSeries.Type type, Boolean adjusted, String interval) throws IOException {
-        return getCsvData(type, adjusted, interval);
-    }
-
-    private TimeSeries getCsvData(TimeSeries.Type type, Boolean adjusted, String interval) throws IOException {
-
         String function = functionStrings.get(type);
         StringBuilder sbTitle = new StringBuilder(symbol + ": " + function);
 
@@ -69,10 +68,6 @@ public class Stock extends ApiQuery {
         series.info.title = sbTitle.toString();
         return series;
     }
-
-
-    public String symbol;
-    public String outputSize;
 
     private static final String defaultInterval = "30min";
     private static final Map<TimeSeries.Type, String> functionStrings = new EnumMap<>(TimeSeries.Type.class) {{
