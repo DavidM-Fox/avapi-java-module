@@ -1,7 +1,6 @@
-import com.dmf15a.avapi.ApiQuery;
 import com.dmf15a.avapi.Company.Stock.Stock;
 import com.dmf15a.avapi.Container.TimeSeries;
-import com.google.gson.JsonObject;
+import com.dmf15a.avapi.Utils;
 
 import java.io.IOException;
 
@@ -9,10 +8,10 @@ public class MainApp {
     public static void main(String[] args) throws IOException {
 
         String symbol = "GME";
-        String function = "GLOBAL_QUOTE";
+        String apiKey = Utils.readApiKey("api.key");
+        Stock gme = new Stock(symbol, apiKey);
 
-        Stock gme = new Stock(symbol, "");
-        gme.setApiKey("KEY");
         TimeSeries series = gme.getTimeSeries(TimeSeries.Type.INTRADAY, true);
+        series.print(3);
     }
 }

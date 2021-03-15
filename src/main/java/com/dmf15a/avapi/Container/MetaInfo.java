@@ -1,5 +1,7 @@
 package com.dmf15a.avapi.Container;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 
 public class MetaInfo {
@@ -28,4 +30,5 @@ public class MetaInfo {
         this.type = info.type;
         this.adjusted = info.adjusted;
     }
+
 }

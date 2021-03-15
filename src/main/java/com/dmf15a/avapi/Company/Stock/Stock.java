@@ -61,7 +61,7 @@ public class Stock extends ApiQuery {
         addQuery("datatype", "csv");
 
 
-        TimeSeries series = new TimeSeries(Utils.parseCsvResponse(getResponse()));
+        TimeSeries series = new TimeSeries(Utils.parseCsvContent(getResponse()));
         series.info.symbol = symbol;
         series.info.type = type;
         series.info.adjusted = adjusted;

@@ -18,31 +18,29 @@ import java.util.TimeZone;
 
 public class Utils {
 
-    public static TimeSeries parseCsvResponse(Object response) throws IOException {
+    public static TimeSeries parseCsvContent(Object content) throws IOException {
 
         StringWriter csv = new StringWriter();
-        IOUtils.copy((InputStream)response, csv, "UTF-8");
+        IOUtils.copy((InputStream) content, csv, "UTF-8");
 
-        // Parse csv data into TimeSeries
+        // Parse CSV data into TimeSeries
         TimeSeries series = new TimeSeries();
         try (BufferedReader reader = new BufferedReader(new StringReader(csv.toString()))) {
-
-            // The
 
             // Get CSV Headers
             String line = reader.readLine();
             ArrayList<String> headers = new ArrayList<>(Arrays.asList(line.split(",")));
 
             // Read each line from CSV string
-            ArrayList<TimePair> timePairList = new ArrayList<TimePair>();
+            ArrayList<TimePair> timePairList = new ArrayList<>();
             line = reader.readLine();
-            while(line != null) {
+            while (line != null) {
 
                 // Split line by commas
                 ArrayList<String> lineData = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                // Convert values to Floats (Skip timestamp column)
-                ArrayList<Float> data = new ArrayList<Float>();
+                // Convert values to Floats (skip timestamp column)
+                ArrayList<Float> data = new ArrayList<>();
                 for (int i = 1; i < lineData.size(); ++i) {
                     data.add(Float.parseFloat(lineData.get(i)));
                 }
@@ -62,19 +60,17 @@ public class Utils {
         return series;
     }
 
-    public static JsonObject parseJsonResponse(Object response)
-    {
+    public static JsonObject parseJsonContent(Object content) {
         JsonParser jp = new JsonParser();
-        JsonElement root = jp.parse(new InputStreamReader((InputStream) response));
+        JsonElement root = jp.parse(new InputStreamReader((InputStream) content));
         return root.getAsJsonObject();
     }
 
-    public static long toUnixTimestamp(String time)
-    {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:MM:SS", Locale.ENGLISH); //Specify your locale
+    public static long toUnixTimestamp(String time) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:MM:SS", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
 
         long unixTime = 0;
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+5:30")); //Specify your timezone
         try {
             unixTime = dateFormat.parse(time).getTime();
             unixTime = unixTime / 1000;
@@ -82,5 +78,10 @@ public class Utils {
             e.printStackTrace();
         }
         return unixTime;
+    }
+
+    public static String readApiKey(String filePath) throws IOException {
+        BufferedReader brTest = new BufferedReader(new FileReader(filePath));
+        return brTest.readLine();
     }
 }
