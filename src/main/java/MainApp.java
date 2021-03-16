@@ -1,4 +1,5 @@
-import com.dmf15a.avapi.Company.Stock.Stock;
+import com.dmf15a.avapi.Company.Company;
+import com.dmf15a.avapi.Company.Stock.GlobalQuote;
 import com.dmf15a.avapi.Container.TimeSeries;
 import com.dmf15a.avapi.Utils;
 
@@ -9,9 +10,9 @@ public class MainApp {
 
         String symbol = "GME";
         String apiKey = Utils.readApiKey("api.key");
-        Stock gme = new Stock(symbol, apiKey);
 
-        TimeSeries series = gme.getTimeSeries(TimeSeries.Type.INTRADAY, true);
-        series.print(3);
+        Company gme = new Company(symbol, apiKey);
+        gme.Stock().getTimeSeries(TimeSeries.Type.DAILY, true).print();
+
     }
 }

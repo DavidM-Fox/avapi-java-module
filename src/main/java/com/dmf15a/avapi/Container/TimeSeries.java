@@ -1,27 +1,133 @@
 package com.dmf15a.avapi.Container;
 
-import org.apache.commons.lang.StringUtils;
+import com.dmf15a.avapi.ApiQuery;
+import com.dmf15a.avapi.Printer.TablePrinter;
+import com.dmf15a.avapi.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 
-public class TimeSeries {
+public class TimeSeries extends ApiQuery {
+
 
     public enum Type {INTRADAY, DAILY, WEEKLY, MONTHLY, COUNT}
 
+    public class MetaInfo {
+        public String symbol;
+        public String market;
+        public TimeSeries.Type type;
+        public String interval;
+        public Boolean adjusted;
+        public String title;
+        public ArrayList<String> headers;
+        public String outputSize;
+
+        public MetaInfo() {
+            this.symbol = "";
+            this.market = "";
+            this.type = Type.COUNT;
+            this.interval = "";
+            this.adjusted = false;
+            this.title = "";
+            this.headers = new ArrayList<>();
+            this.outputSize = "compact";
+        }
+
+        public MetaInfo(String symbol, String market, Type type, Boolean adjusted, String interval, String title, String outputSize) {
+            this.symbol = symbol;
+            this.market = market;
+            this.type = type;
+            this.adjusted = adjusted;
+            this.interval = interval;
+            this.title = title;
+            this.headers = new ArrayList<>();
+            this.outputSize = outputSize;
+        }
+
+        public MetaInfo(MetaInfo info) {
+            this.symbol = info.symbol;
+            this.market = info.market;
+            this.type = info.type;
+            this.adjusted = info.adjusted;
+            this.interval = info.interval;
+            this.title = info.title;
+            this.headers = new ArrayList<>(info.headers);
+            this.outputSize = info.outputSize;
+        }
+    }
+
     public MetaInfo info;
     public ArrayList<TimePair> data;
-    public int cellWidth;
 
     public TimeSeries() {
+        super("");
         this.info = new MetaInfo();
         this.data = new ArrayList<>();
-        this.cellWidth = 14;
+    }
+
+    public TimeSeries(String symbol, String apiKey, String market, Type type, Boolean adjusted, String interval, String outputSize) throws IOException {
+        super(apiKey);
+        this.info = new MetaInfo(symbol, market, type, adjusted, interval, "", outputSize);
+        update();
     }
 
     public TimeSeries(TimeSeries series) {
+        super(series.getApiKey());
         this.info = new MetaInfo(series.info);
         this.data = new ArrayList<>(series.data);
-        this.cellWidth = 14;
+    }
+
+    public void update() throws IOException {
+
+        Boolean warning = false;
+        if (info.type == Type.COUNT) {
+            System.err.println("WARNING: No type set, cannot update\n" +
+                    "\tat com.dmf15a.avapi.Container.TimeSeries\n");
+            warning = true;
+        }
+        if (info.symbol.equals("")) {
+            System.err.println("WARNING: No symbol set, cannot update\n" +
+                    "\tat com.dmf15a.avapi.Container.TimeSeries\n");
+            warning = true;
+        }
+        if (warning)
+            return;
+
+        String function = functionStrings.get(info.type);
+        StringBuilder sbTitle = new StringBuilder(info.symbol + ": " + function);
+
+        // INTRADAY Check (different fields)
+        if (info.type == TimeSeries.Type.INTRADAY) {
+            addQuery("function", function);
+
+            if (info.interval.equals(""))
+                info.interval = defaultInterval;
+
+            addQuery("interval", info.interval);
+            addQuery("adjusted", info.adjusted.toString());
+            sbTitle.append(" (").append(info.interval).append(", adjusted=").append(info.adjusted.toString()).append(")");
+        } else {
+            if (info.adjusted) {
+                addQuery("function", functionStrings.get(info.type) + "_ADJUSTED");
+                sbTitle.append(" (adjusted=true");
+            } else {
+                addQuery("function", functionStrings.get(info.type));
+                sbTitle.append(" (adjusted=false)");
+            }
+        }
+
+        // Add additional query fields
+        addQuery("symbol", info.symbol);
+        addQuery("outputsize", info.outputSize);
+        addQuery("datatype", "csv");
+
+        // Create new TimeSeries and update from it
+        TimeSeries series = new TimeSeries(Utils.parseCsvContent(getResponse()));
+        this.info.headers = series.info.headers;
+        this.info.title = sbTitle.toString();
+        this.data = series.data;
     }
 
     public int colCount() {
@@ -33,69 +139,31 @@ public class TimeSeries {
     }
 
     public void print() {
-        // Default parameter
+        // Default parameter (0 = print all)
         print(0);
     }
 
     public void print(int count) {
-        // Build separator string
-        int nCols = colCount();
-        int tableWidth = (nCols * cellWidth) + nCols + 1;
-        String separator = getSeparator(tableWidth);
+        // Create printer object and print header block
+        TablePrinter printer = new TablePrinter(info.title, info.headers, 14);
+        printer.printHeader();
 
-        // Build format string
-        StringBuilder sbFormat = new StringBuilder("|");
-        for (var i = 0; i < nCols; ++i)
-            sbFormat.append("%").append(cellWidth).append("s|");
-        String format = sbFormat.append("\n").toString();
-
-        // Print Title/Headers Box
-        System.out.println(separator);
-        System.out.format(String.format("|%%%ds|\n", tableWidth - 2), center(info.title, tableWidth - 2));
-        System.out.println(separator);
-        System.out.format(format, center(info.headers).toArray());
-        System.out.println(separator);
-
-        // We will print up to count...
+        // Print up to count (0 = print all)
         int n = count;
-        int nRows = rowCount();
-        if (count > nRows)
-            n = nRows;
-        else if (count == 0)
-            n = nRows;
+        if (count > rowCount() || count == 0)
+            n = rowCount();
 
         // Print TimeSeries' data
         for (int i = 0; i < n; ++i)
-            System.out.format(format, formatData(data.get(i).timestamp, data.get(i).data).toArray());
+            printer.printDataRow(printer.centerData(data.get(i).timestamp, data.get(i).data));
     }
 
-    private String getSeparator(int tableWidth) {
-        // Create a line separator based on tableWidth
-        StringBuilder separator = new StringBuilder();
-        separator.append("-".repeat(Math.max(0, tableWidth)));
-        return separator.toString();
-    }
+    private static final String defaultInterval = "30min";
+    private static final Map<Type, String> functionStrings = new EnumMap<>(TimeSeries.Type.class) {{
+        put(TimeSeries.Type.INTRADAY, "TIME_SERIES_INTRADAY");
+        put(TimeSeries.Type.DAILY, "TIME_SERIES_DAILY");
+        put(TimeSeries.Type.WEEKLY, "TIME_SERIES_WEEKLY");
+        put(TimeSeries.Type.MONTHLY, "TIME_SERIES_MONTHLY");
+    }};
 
-    private ArrayList<String> formatData(long timestamp, ArrayList<Float> data) {
-        // Create new ArrayList and add centered timestamp/data
-        ArrayList<String> centered = new ArrayList<>();
-        centered.add(center(timestamp));
-        data.forEach((value) -> centered.add(String.format("%.2f", value)));
-        return centered;
-    }
-
-    private String center(long timestamp) {
-        return StringUtils.center(String.valueOf(timestamp), cellWidth);
-    }
-
-    private String center(String str, int centerWidth) {
-        return StringUtils.center(str, centerWidth);
-    }
-
-    private ArrayList<String> center(ArrayList<String> headers) {
-        // Create new ArrayList and add centered headers
-        ArrayList<String> centered = new ArrayList<>();
-        headers.forEach((header) -> centered.add(StringUtils.center(header, cellWidth)));
-        return centered;
-    }
 }

@@ -11,10 +11,7 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 public class Utils {
 
@@ -66,18 +63,16 @@ public class Utils {
         return root.getAsJsonObject();
     }
 
-    public static long toUnixTimestamp(String time) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:MM:SS", Locale.ENGLISH);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
-
-        long unixTime = 0;
-        try {
-            unixTime = dateFormat.parse(time).getTime();
-            unixTime = unixTime / 1000;
-        } catch (ParseException e) {
-            e.printStackTrace();
+    public static Long toUnixTimestamp(String time) {
+        List<String> formatStrings = Arrays.asList("yyyy-MM-dd HH:MM:SS", "yyyy-MM-dd");
+        for (String format : formatStrings) {
+            try {
+                DateFormat dateFormat = new SimpleDateFormat(format, Locale.ENGLISH);
+                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
+                return dateFormat.parse(time).getTime() / 1000;
+            } catch (ParseException e) { }
         }
-        return unixTime;
+        return null;
     }
 
     public static String readApiKey(String filePath) throws IOException {
