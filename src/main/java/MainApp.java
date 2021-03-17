@@ -12,7 +12,7 @@ public class MainApp {
         String apiKey = Utils.readApiKey("api.key");
 
         Company gme = new Company(symbol, apiKey);
-        gme.Stock().getTimeSeries(TimeSeries.Type.DAILY, true).print();
-
+        gme.Earnings().annual.print(5);
+        gme.Earnings().quarterly.print(5);
     }
 }

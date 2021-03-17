@@ -49,6 +49,14 @@ public class TablePrinter {
         System.out.format(format, data.toArray());
     }
 
+
+    // Parse string as float, set precision, return as String
+    public static String formatFloatString(String str) {
+        str.replaceAll("%", "");
+        String value = String.format("%.2f", Float.parseFloat(str));
+        return value;
+    }
+
     // Return a formatted ArrayList<String> of timestamp and float data
     public ArrayList<String> centerData(long timestamp, ArrayList<Float> data) {
         ArrayList<String> centered = new ArrayList<>();
@@ -58,17 +66,22 @@ public class TablePrinter {
     }
 
     // Return a centered timestamp String based on cellW
-    private String center(long timestamp) {
+    public String center(long timestamp) {
         return StringUtils.center(String.valueOf(timestamp), cellW);
     }
 
     // @Overload Return a centered String based on centerWidth
-    private String center(String str, int centerW) {
+    public static String center(String str, int centerW) {
         return StringUtils.center(str, centerW);
     }
 
+    // @Overload Return a centered String based on centerWidth
+    public String center(String str) {
+        return StringUtils.center(str, this.cellW);
+    }
+
     // @Overload Return an ArrayList<String> of centered Strings based on cellW
-    private ArrayList<String> center(ArrayList<String> headers) {
+    public ArrayList<String> center(ArrayList<String> headers) {
         ArrayList<String> centered = new ArrayList<>();
         headers.forEach((header) -> centered.add(StringUtils.center(header, cellW)));
         return centered;
