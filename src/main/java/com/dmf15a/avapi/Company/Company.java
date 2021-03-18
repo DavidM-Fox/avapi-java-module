@@ -1,33 +1,34 @@
 package com.dmf15a.avapi.Company;
 
-import com.dmf15a.avapi.Company.Earnings.Earnings;
-import com.dmf15a.avapi.Company.Stock.Stock;
-
 import java.io.IOException;
 
 public class Company {
 
-    private String symbol;
-    private String apiKey;
+    public static class MetaInfo {
+        public String symbol;
+        public String apiKey;
+        public MetaInfo(String ...args) {
+            this.symbol = args[0];
+            this.apiKey = args[1];
+        }
+    }
 
+    public Company.MetaInfo info;
     private Stock stock;
     private Earnings earnings;
 
-    public Company(String symbol, String key)
-    {
-        this.symbol = symbol;
-        this.apiKey = key;
+    public Company(String symbol, String apiKey) {
+        this.info = new MetaInfo(symbol, apiKey);
     }
 
-    public Stock Stock() {
-        if(stock == null)
-            stock = new Stock(symbol, apiKey);
+    public Stock stock() {
+        if (stock == null)
+            stock = new Stock(info);
         return stock;
     }
-
-    public Earnings Earnings() throws IOException {
-        if(stock == null)
-            earnings = new Earnings(symbol, apiKey);
+    public Earnings earnings() throws IOException {
+        if (stock == null)
+            earnings = new Earnings(info);
         return earnings;
     }
 }
