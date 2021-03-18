@@ -1,6 +1,4 @@
 import com.dmf15a.avapi.Company.Company;
-import com.dmf15a.avapi.Company.Stock.GlobalQuote;
-import com.dmf15a.avapi.Container.TimeSeries;
 import com.dmf15a.avapi.Utils;
 
 import java.io.IOException;
@@ -12,7 +10,7 @@ public class MainApp {
         String apiKey = Utils.readApiKey("api.key");
 
         Company gme = new Company(symbol, apiKey);
-        gme.Earnings().annual.print(5);
-        gme.Earnings().quarterly.print(5);
+        gme.earnings().annual.print(5);
+        gme.earnings().quarterly.print(5);
     }
 }
