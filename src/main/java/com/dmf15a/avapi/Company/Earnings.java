@@ -1,4 +1,4 @@
-package com.dmf15a.avapi.Company.Earnings;
+package com.dmf15a.avapi.Company;
 
 import com.dmf15a.avapi.ApiQuery;
 import com.dmf15a.avapi.Container.AnnualEarnings;
