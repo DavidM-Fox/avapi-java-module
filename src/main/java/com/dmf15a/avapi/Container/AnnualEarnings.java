@@ -18,7 +18,7 @@ public class AnnualEarnings {
     }
 
     public final String symbol;
-    public ArrayList<Report> earningsData;
+    public ArrayList<AnnualEarnings.Report> earningsData;
 
     public AnnualEarnings(String symbol) {
         this.symbol = symbol;
@@ -40,7 +40,7 @@ public class AnnualEarnings {
             n = rowCount();
 
         for (int i = 0; i < n; ++i) {
-            printer.printDataRow(new ArrayList<String>(Arrays.asList(
+            printer.printDataRow(new ArrayList<>(Arrays.asList(
                     printer.center(earningsData.get(i).fiscalDateEnding),
                     TablePrinter.formatFloatString(earningsData.get(i).reportedEPS)
             )));
