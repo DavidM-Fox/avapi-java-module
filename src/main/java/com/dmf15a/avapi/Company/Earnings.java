@@ -9,18 +9,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class Earnings extends ApiQuery {
 
     public class MetaInfo {
         public String symbol;
         public String market;
-
-        public MetaInfo() {
-            this.symbol = "";
-            this.market = "";
+        public MetaInfo(String ...args) {
+            this.symbol = args[0];
+            this.market = args[1];
         }
     }
 
@@ -31,20 +28,25 @@ public class Earnings extends ApiQuery {
 
     public Earnings(String symbol, String apiKey) throws IOException {
         super(apiKey);
-        this.info = new MetaInfo();
-        this.info.symbol = symbol;
-        this.info.market = "USD";
+        this.info = new MetaInfo(symbol, "USD");
         this.annual = new AnnualEarnings(symbol);
         this.quarterly = new QuarterlyEarnings(symbol);
         update();
     }
 
+    public Earnings(Company.MetaInfo info) throws IOException {
+        super(info.apiKey);
+        this.info = new MetaInfo(info.symbol, "USD");
+        this.annual = new AnnualEarnings(info.symbol);
+        this.quarterly = new QuarterlyEarnings(info.symbol);
+        update();
+    }
+
     public void update() throws IOException {
 
-        if (getApiKey() == "") {
-            System.err.println(new StringBuilder("WARNING: No API Key set\n")
-                    .append("\tat com.dmf15a.avapi.Company.Earnings")
-                    .toString());
+        if (getApiKey().equals("")) {
+            System.err.println("WARNING: No API Key set\n" +
+                    "\tat com.dmf15a.avapi.Company.Earnings");
             return;
         }
 
