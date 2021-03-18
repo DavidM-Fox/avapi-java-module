@@ -1,9 +1,7 @@
 package com.dmf15a.avapi.Container;
 
-import com.dmf15a.avapi.ApiQuery;
 import com.dmf15a.avapi.Printer.TablePrinter;
 
-import java.io.*;
 import java.util.ArrayList;
 
 public class GlobalQuote {
@@ -13,6 +11,7 @@ public class GlobalQuote {
         public String market;
         public String title;
         public ArrayList<String> headers;
+
         public MetaInfo(String... args) {
             this.symbol = args[0];
             this.market = args[1];

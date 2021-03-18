@@ -17,28 +17,14 @@ public class QuarterlyEarnings {
 
         public ArrayList<String> reportData;
 
-        public Report(String fiscalDateEnding,
-                      String reportedDate,
-                      String reportedEPS,
-                      String estimatedEPS,
-                      String surprise,
-                      String surprisePercentage) {
-
-            this.fiscalDateEnding = fiscalDateEnding;
-            this.reportedDate = reportedDate;
-            this.reportedEPS = reportedEPS;
-            this.estimatedEPS = estimatedEPS;
-            this.surprise = surprise;
-            this.surprisePercentage = surprisePercentage;
-
-            this.reportData = new ArrayList<>(Arrays.asList(
-                    this.fiscalDateEnding,
-                    this.reportedDate,
-                    this.reportedEPS,
-                    this.estimatedEPS,
-                    this.surprise,
-                    this.surprisePercentage
-            ));
+        public Report(String... args) {
+            this.fiscalDateEnding = args[0];
+            this.reportedDate = args[1];
+            this.reportedEPS = args[2];
+            this.estimatedEPS = args[3];
+            this.surprise = args[4];
+            this.surprisePercentage = args[5];
+            this.reportData = new ArrayList<>(Arrays.asList(args));
         }
     }
 
@@ -57,15 +43,7 @@ public class QuarterlyEarnings {
     public void print(int count) {
 
         // Format title/headers
-        String title = new StringBuilder(symbol).append(": Quarterly Earnings").toString();
-        ArrayList<String> headers = new ArrayList<>(Arrays.asList(
-                "Fiscal Date Ending",
-                "Reported Date",
-                "Reported EPS",
-                "Estimated EPS",
-                "Surprise",
-                "Surprise %"
-        ));
+        String title = symbol + ": Quarterly Earnings";
 
         // New printer object, print headers box
         TablePrinter printer = new TablePrinter(title, headers, 20);
@@ -98,4 +76,13 @@ public class QuarterlyEarnings {
             }
         }
     }
+
+    private final ArrayList<String> headers = new ArrayList<>(Arrays.asList(
+            "Fiscal Date Ending",
+            "Reported Date",
+            "Reported EPS",
+            "Estimated EPS",
+            "Surprise",
+            "Surprise %"
+    ));
 }

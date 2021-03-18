@@ -3,7 +3,7 @@ package com.dmf15a.avapi.Company;
 import com.dmf15a.avapi.ApiQuery;
 import com.dmf15a.avapi.Container.AnnualEarnings;
 import com.dmf15a.avapi.Container.QuarterlyEarnings;
-import com.dmf15a.avapi.Utils;
+import com.dmf15a.avapi.Misc;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -54,7 +54,7 @@ public class Earnings extends ApiQuery {
         addQuery("function", "EARNINGS");
         addQuery("symbol", info.symbol);
 
-        JsonObject jsonData = Utils.parseJsonContent(getResponse());
+        JsonObject jsonData = Misc.parseJsonContent(getResponse());
 
         // Parse annual earnings
         JsonArray annual = jsonData.get("annualEarnings").getAsJsonArray();
