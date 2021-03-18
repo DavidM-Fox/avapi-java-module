@@ -34,9 +34,11 @@ public class ApiQuery {
             queries.put(field, value);
     }
 
-    public String getQuery(String field) {
-        return queries.get(field);
+    public void resetQuery() {
+        queries.clear();
+        queries.put("apikey", apiKey);
     }
+
 
     public Object getResponse() throws IOException {
         URL url = new URL(buildUrl());
