@@ -13,7 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Utils {
+public class Misc {
 
     public static TimeSeries parseCsvContent(Object content) throws IOException {
 
@@ -43,6 +43,7 @@ public class Utils {
                 }
 
                 // Add new TimePair to the list (Convert timestamp column)
+                //noinspection ConstantConditions
                 timePairList.add(new TimePair(toUnixTimestamp(lineData.get(0)), data));
                 line = reader.readLine();
             }
@@ -63,6 +64,7 @@ public class Utils {
         return root.getAsJsonObject();
     }
 
+
     public static Long toUnixTimestamp(String time) {
         List<String> formatStrings = Arrays.asList("yyyy-MM-dd HH:MM:SS", "yyyy-MM-dd");
         for (String format : formatStrings) {
@@ -70,9 +72,17 @@ public class Utils {
                 DateFormat dateFormat = new SimpleDateFormat(format, Locale.ENGLISH);
                 dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-5:00"));
                 return dateFormat.parse(time).getTime() / 1000;
-            } catch (ParseException e) { }
+            } catch (ParseException ignored) { }
         }
         return null;
+    }
+
+    public static Boolean checkIfEmpty(String ...args) {
+        for(String value : args) {
+            if(value.equals(""))
+                return true;
+        }
+        return false;
     }
 
     public static String readApiKey(String filePath) throws IOException {
