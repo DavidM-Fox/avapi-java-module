@@ -3,19 +3,20 @@ package com.dmf15a.avapi.Company;
 import com.dmf15a.avapi.ApiQuery;
 import com.dmf15a.avapi.Container.GlobalQuote;
 import com.dmf15a.avapi.Container.TimeSeries;
-import com.dmf15a.avapi.Utils;
+import com.dmf15a.avapi.Misc;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.*;
 
-import static com.dmf15a.avapi.Utils.toUnixTimestamp;
+import static com.dmf15a.avapi.Misc.toUnixTimestamp;
 
 public class Stock extends ApiQuery {
 
     public static class MetaInfo {
         public String symbol;
         public String outputSize;
+
         public MetaInfo(String... args) {
             this.symbol = args[0];
             this.outputSize = args[1];
@@ -41,13 +42,17 @@ public class Stock extends ApiQuery {
 
     public GlobalQuote getGlobalQuote() throws IOException {
 
-        if (getApiKey().equals("")) {
-            System.err.println("WARNING: No API Key set\n" +
+        // Check if any required String is empty
+        if (Misc.checkIfEmpty(info.symbol, getApiKey())) {
+            System.err.println("WARNING: A required ApiQuery field is empty:" +
+                    String.format("[symbol=%s]", info.symbol) +
+                    String.format("[apiKey=%s]", getApiKey()) + "]: Returning an empty GlobalQuote:\n" +
                     "\tat com.dmf15a.avapi.Company.Stock.getGlobalQuote()");
             return new GlobalQuote();
         }
 
         // Only three parameters needed for GlobalQuote
+        resetQuery();
         addQuery("function", "GLOBAL_QUOTE");
         addQuery("symbol", info.symbol);
         addQuery("datatype", "csv");
@@ -72,7 +77,7 @@ public class Stock extends ApiQuery {
             Collections.swap(quote.info.headers, 0, 6);
             Collections.swap(data, 0, 6);
 
-            // Remove symbol column, convert data into Floats
+            // Remove symbol column
             quote.info.headers.remove(6);
             data.remove(6);
 
@@ -84,6 +89,7 @@ public class Stock extends ApiQuery {
             // Remove '%' from Percent Change string
             data.set(7, data.get(7).replaceAll("%", ""));
 
+            // Convert each String into Floats
             for (String value : data) {
                 quote.data.add(Float.parseFloat(value));
             }
@@ -100,18 +106,12 @@ public class Stock extends ApiQuery {
 
     public TimeSeries getTimeSeries(TimeSeries.Type type, Boolean adjusted, String interval) throws IOException {
 
-        if (info.symbol.equals("")) {
-            System.err.println("WARNING: No symbol set, returning an empty TimeSeries.\n" +
-                    "\tat com.dmf15a.avapi.Company.Stock.getTimeSeries()\n");
-            return new TimeSeries();
-        }
-        if (info.outputSize.equals("")) {
-            System.err.println("WARNING: No output size set, returning an empty TimeSeries.\n" +
-                    "\tat com.dmf15a.avapi.Company.Stock.getTimeSeries()\n");
-            return new TimeSeries();
-        }
-        if (getApiKey().equals("")) {
-            System.err.println("WARNING: No api key set, returning an empty TimeSeries.\n" +
+        // Check if any required String is empty
+        if (Misc.checkIfEmpty(info.symbol, info.outputSize, getApiKey())) {
+            System.err.println("WARNING: A required ApiQuery field is empty:" +
+                    String.format("[symbol=%s]", info.symbol) +
+                    String.format("[apiKey=%s]", getApiKey()) +
+                    String.format("[outputSize=%s]:", info.outputSize) + "Returning an empty TimeSeries:\n" +
                     "\tat com.dmf15a.avapi.Company.Stock.getTimeSeries()\n");
             return new TimeSeries();
         }
@@ -119,24 +119,19 @@ public class Stock extends ApiQuery {
         String function = functionStrings.get(type);
         StringBuilder sbTitle = new StringBuilder(info.symbol + ": " + function);
 
-        // INTRADAY Check (different fields)
+        // INTRADAY Check (different required fields)
+        resetQuery();
         if (type == TimeSeries.Type.INTRADAY) {
-            addQuery("function", function);
-
             if (interval.equals(""))
                 interval = defaultInterval;
-
+            addQuery("function", function);
             addQuery("interval", interval);
             addQuery("adjusted", adjusted.toString());
             sbTitle.append(" (").append(interval).append(", adjusted=").append(adjusted.toString()).append(")");
         } else {
-            if (adjusted) {
-                addQuery("function", function + "_ADJUSTED");
-                sbTitle.append(" (adjusted=true");
-            } else {
-                addQuery("function", function);
-                sbTitle.append(" (adjusted=false)");
-            }
+            String adj = (adjusted) ? "_ADJUSTED" : "";
+            addQuery("function", function + adj);
+            sbTitle.append(" (adjusted=").append(adjusted.toString()).append(")");
         }
 
         // Add additional query fields
@@ -145,7 +140,7 @@ public class Stock extends ApiQuery {
         addQuery("datatype", "csv");
 
         // Create new TimeSeries and update from it
-        TimeSeries series = new TimeSeries(Utils.parseCsvContent(getResponse()));
+        TimeSeries series = new TimeSeries(Misc.parseCsvContent(getResponse()));
         series.info.title = sbTitle.toString();
         return series;
     }
